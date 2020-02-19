@@ -28,13 +28,21 @@ public class NewMain {
         ScriptEngine engine = factory.getScriptEngine();
         String script = FileUtils.readFileToString(new File("script.R"), "utf-8");
         engine.eval(script);
+        //System.out.println(engine.eval("nrow(tags)").getClass());
+        org.renjin.sexp.StringArrayVector tagNames=(org.renjin.sexp.StringArrayVector) engine.eval("tagNames");
 //        org.renjin.primitives.matrix.DeferredMatrixProduct cooccur=(org.renjin.primitives.matrix.DeferredMatrixProduct) engine.eval("cooccur");
 //        Matrix matrix=new Matrix(cooccur);
 //        System.out.println(matrix.getElementAsDouble(0, 0));
         org.renjin.sexp.StringArrayVector tags=(org.renjin.sexp.StringArrayVector) engine.eval("as.vector(indTags[indTags$indTagRatio<0.5,]$indTagName)");
         for(int i=0; i<tags.length(); i++){
             String tag=tags.getElementAsString(i);
-            System.out.println(engine.eval("tags[tags$"+tag+"==1,]").getClass());
+            System.out.println(tag);
+            for(String tagName : tagNames){
+                if(tagName.equals(tag)==false){
+                    org.renjin.sexp.IntArrayVector nrows=(org.renjin.sexp.IntArrayVector) engine.eval("nrow(tags[tags$"+tag+"==1 & tags$"+tagName+"==1,])");
+                    System.out.println(nrows.asInt());
+                }
+            }
         }
     }
 
