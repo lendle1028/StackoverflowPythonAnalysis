@@ -37,10 +37,14 @@ public class NewMain {
         for(int i=0; i<tags.length(); i++){
             String tag=tags.getElementAsString(i);
             System.out.println(tag);
+            double base=((org.renjin.sexp.IntArrayVector) engine.eval("nrow(tags[tags$"+tag+"==1,])")).asReal();
             for(String tagName : tagNames){
                 if(tagName.equals(tag)==false){
                     org.renjin.sexp.IntArrayVector nrows=(org.renjin.sexp.IntArrayVector) engine.eval("nrow(tags[tags$"+tag+"==1 & tags$"+tagName+"==1,])");
-                    System.out.println(nrows.asInt());
+                    double ratio=(nrows.asReal()/base);
+                    if(ratio>0.1){
+                        System.out.println("\t"+tagName);
+                    }
                 }
             }
         }
