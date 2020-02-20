@@ -17,6 +17,11 @@
             <version>3.5-beta43</version>
         </dependency>
         <dependency>
+            <groupId>org.renjin.cran</groupId>
+            <artifactId>R6</artifactId>
+            <version>2.4.0-b12</version>
+        </dependency>
+        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
