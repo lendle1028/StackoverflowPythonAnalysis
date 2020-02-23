@@ -31,9 +31,12 @@ public class NewMain {
      * if a tag occurs more than TAG_BRANCHING_OCCURRENCE_THRESHOLD times it can
      * branch; otherwise, the tag will be treated as a leaf node
      */
+//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 100;
+//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 10;
+//    public static final double BRANCH_RATIO_THRESHOLD = 0.1d;
     public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 100;
-    public static final double BRANCH_OCCURRENCE_THRESHOLD = 10;
-    public static final double BRANCH_RATIO_THRESHOLD = 0.1d;
+    public static final double BRANCH_OCCURRENCE_THRESHOLD = 50;
+    public static final double BRANCH_RATIO_THRESHOLD = 0.05d;
     private static HashSet<String> tagTreeNodeSet = new HashSet<>();
     private static int tagVectorIndex = 1;
 
