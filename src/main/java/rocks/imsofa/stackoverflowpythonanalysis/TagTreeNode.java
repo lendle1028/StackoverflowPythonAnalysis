@@ -62,7 +62,11 @@ public class TagTreeNode {
     public List<TagTreeNode> getChildNodes() {
         return new ArrayList<>(this.childNodes);
     }
-
+    
+    public void removeChildNode(TagTreeNode childNode){
+        this.childNodes.remove(childNode);
+    }
+    
     @Override
     public int hashCode() {
         int[] myPath = this.getPath();
@@ -77,9 +81,11 @@ public class TagTreeNode {
             return true;
         }
         if (obj == null) {
+            System.out.println("here2");
             return false;
         }
         if (getClass() != obj.getClass()) {
+            System.out.println("here3");
             return false;
         }
         final TagTreeNode other = (TagTreeNode) obj;
@@ -89,6 +95,7 @@ public class TagTreeNode {
         Arrays.sort(otherPath);
         String myPathString = Arrays.toString(myPath);
         String otherPathString = Arrays.toString(otherPath);
+        //System.out.println("comparing: "+myPathString+":"+otherPathString+":"+Objects.equals(myPathString, otherPathString));
         if (!Objects.equals(myPathString, otherPathString)) {
             return false;
         }
@@ -102,6 +109,7 @@ public class TagTreeNode {
             buffer.append("\t");
         }
         buffer.append(this.getTagName() + ":" + this.getTagIndex() + ":" + Arrays.toString(path));
+        //buffer.append(this.getTagName() + ":" + this.getTagIndex() + ":" + Arrays.toString(this.getUniquePath()));
         for (TagTreeNode child : this.childNodes) {
             buffer.append("\n");
             buffer.append(child.toString());
