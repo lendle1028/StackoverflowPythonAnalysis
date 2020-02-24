@@ -34,9 +34,28 @@ public class NewMain {
 //    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 100;
 //    public static final double BRANCH_OCCURRENCE_THRESHOLD = 10;
 //    public static final double BRANCH_RATIO_THRESHOLD = 0.1d;
+    
+    //106 centers, 0.618722545450784 v.s. kmeans=0.600343634041933~0.626290108516266
     public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
-    public static final double BRANCH_OCCURRENCE_THRESHOLD = 30;
+    public static final double BRANCH_OCCURRENCE_THRESHOLD = 20;
     public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
+    
+    //81 centers, 0.587998420333592 v.s. kmeans=0.543936662752116~0.570525825373921
+//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 30;
+//    public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
+    
+    //54 centers, 0.556980020200752 v.s. kmeans=0.427998055140778~0.464353053087802
+//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 50;
+//    public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
+    
+    //38 centers, 0.516166777901111 v.s. kmeans=0.385533109047687~0.425939075950038
+//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 100;
+//    public static final double BRANCH_RATIO_THRESHOLD = 0.1d;
+//    
+    
     private static HashSet<String> tagTreeNodeSet = new HashSet<>();
     private static int tagVectorIndex = 1;
 
