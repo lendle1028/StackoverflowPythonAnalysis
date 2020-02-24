@@ -34,9 +34,9 @@ public class NewMain {
 //    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 100;
 //    public static final double BRANCH_OCCURRENCE_THRESHOLD = 10;
 //    public static final double BRANCH_RATIO_THRESHOLD = 0.1d;
-    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 100;
-    public static final double BRANCH_OCCURRENCE_THRESHOLD = 50;
-    public static final double BRANCH_RATIO_THRESHOLD = 0.05d;
+    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+    public static final double BRANCH_OCCURRENCE_THRESHOLD = 30;
+    public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
     private static HashSet<String> tagTreeNodeSet = new HashSet<>();
     private static int tagVectorIndex = 1;
 
@@ -178,7 +178,7 @@ public class NewMain {
             vectors.addAll(subExpressions);
         }
         int[] path = node.getPath();
-        if (path.length > 1/* && node.getChildNodes().isEmpty()*/) {
+        if (path.length > 1 /*&& node.getChildNodes().isEmpty()*/) {
             StringBuffer ret = new StringBuffer();
             String varName = "TAGVECTOR" + (tagVectorIndex++);
             ret.append(varName + "=as.vector(rep(0, times=217))\r\n");
