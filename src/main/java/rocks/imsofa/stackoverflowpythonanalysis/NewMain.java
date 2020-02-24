@@ -35,10 +35,15 @@ public class NewMain {
 //    public static final double BRANCH_OCCURRENCE_THRESHOLD = 10;
 //    public static final double BRANCH_RATIO_THRESHOLD = 0.1d;
     
-    //106 centers, 0.618722545450784 v.s. kmeans=0.600343634041933~0.626290108516266
+    //91 centers, 0.606568199088119 v.s. kmeans=0.55289058616877~0.586197342259639
     public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
-    public static final double BRANCH_OCCURRENCE_THRESHOLD = 20;
-    public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
+    public static final double BRANCH_OCCURRENCE_THRESHOLD = 10;
+    public static final double BRANCH_RATIO_THRESHOLD = 0.05d;
+    
+    //106 centers, 0.618722545450784 v.s. kmeans=0.600343634041933~0.626290108516266
+//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 20;
+//    public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
     
     //81 centers, 0.587998420333592 v.s. kmeans=0.543936662752116~0.570525825373921
 //    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
