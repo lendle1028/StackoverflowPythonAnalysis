@@ -8,10 +8,8 @@ package rocks.imsofa.stackoverflowpythonanalysis;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.script.ScriptEngine;
@@ -31,41 +29,46 @@ public class NewMain {
      * if a tag occurs more than TAG_BRANCHING_OCCURRENCE_THRESHOLD times it can
      * branch; otherwise, the tag will be treated as a leaf node
      */
-//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 100;
-//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 10;
-//    public static final double BRANCH_RATIO_THRESHOLD = 0.1d;
-    
+//    public static int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 100;
+//    public static double BRANCH_OCCURRENCE_THRESHOLD = 10;
+//    public static double BRANCH_RATIO_THRESHOLD = 0.1d;
+//    public static double IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS=0.5d;
     //91 centers, 0.606568199088119 v.s. kmeans=0.55289058616877~0.586197342259639
-    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
-    public static final double BRANCH_OCCURRENCE_THRESHOLD = 15;
-    public static final double BRANCH_RATIO_THRESHOLD = 0.05d;
-    
+//    public static int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static double BRANCH_OCCURRENCE_THRESHOLD = 15;
+//    public static double BRANCH_RATIO_THRESHOLD = 0.05d;
+//    public static double IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS=0.5d;
     //91 centers, 0.606568199088119 v.s. kmeans=0.55289058616877~0.586197342259639
-//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
-//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 10;
-//    public static final double BRANCH_RATIO_THRESHOLD = 0.05d;
-    
+//    public static int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static double BRANCH_OCCURRENCE_THRESHOLD = 10;
+//    public static double BRANCH_RATIO_THRESHOLD = 0.05d;
+//    public static double IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS=0.5d;
     //106 centers, 0.618722545450784 v.s. kmeans=0.600343634041933~0.626290108516266
-//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
-//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 20;
-//    public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
-    
+//    public static int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static double BRANCH_OCCURRENCE_THRESHOLD = 20;
+//    public static double BRANCH_RATIO_THRESHOLD = 0.01d;
+//    public static double IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS=0.5d;
     //81 centers, 0.587998420333592 v.s. kmeans=0.543936662752116~0.570525825373921
-//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
-//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 30;
-//    public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
-    
+//    public static int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static double BRANCH_OCCURRENCE_THRESHOLD = 30;
+//    public static double BRANCH_RATIO_THRESHOLD = 0.01d;
+//    public static double IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS=0.5d;
     //54 centers, 0.556980020200752 v.s. kmeans=0.427998055140778~0.464353053087802
-//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
-//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 50;
-//    public static final double BRANCH_RATIO_THRESHOLD = 0.01d;
-    
+//    public static int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+//    public static double BRANCH_OCCURRENCE_THRESHOLD = 50;
+//    public static double BRANCH_RATIO_THRESHOLD = 0.01d;
+//    public static double IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS=0.5d;
     //38 centers, 0.516166777901111 v.s. kmeans=0.385533109047687~0.425939075950038
-//    public static final int TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
-//    public static final double BRANCH_OCCURRENCE_THRESHOLD = 100;
-//    public static final double BRANCH_RATIO_THRESHOLD = 0.1d;
-//    
+    private static double TAG_BRANCHING_OCCURRENCE_THRESHOLD = 200;
+    private static double BRANCH_OCCURRENCE_THRESHOLD = 100;
+    private static double BRANCH_RATIO_THRESHOLD = 0.1d;
+    private static double IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS = 0.5d;
     
+    //hold configuration parameters: TAG_BRANCHING_OCCURRENCE_THRESHOLD, BRANCH_OCCURRENCE_THRESHOLD, BRANCH_RATIO_THRESHOLD, IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS
+    private static double [][] configurations=new double[][]{
+        {200, 100, 0.1d, 0.5d}
+    };
+
     private static HashSet<String> tagTreeNodeSet = new HashSet<>();
     private static int tagVectorIndex = 1;
 
@@ -78,47 +81,62 @@ public class NewMain {
         ScriptEngine engine = factory.getScriptEngine();
         String script = FileUtils.readFileToString(new File("script.R"), "utf-8");
         engine.eval(script);
-        //System.out.println(engine.eval("nrow(tags)").getClass());
         org.renjin.sexp.StringArrayVector tagNames = (org.renjin.sexp.StringArrayVector) engine.eval("as.character(tagNames)");
-//        org.renjin.primitives.matrix.DeferredMatrixProduct cooccur=(org.renjin.primitives.matrix.DeferredMatrixProduct) engine.eval("cooccur");
-//        Matrix matrix=new Matrix(cooccur);
-//        System.out.println(matrix.getElementAsDouble(0, 0));
-        org.renjin.sexp.StringArrayVector tags = (org.renjin.sexp.StringArrayVector) engine.eval("as.vector(indTags[indTags$indTagRatio>=0.5,]$indTagName)");
-        ListVector tagResults = (ListVector) engine.eval("tags");
-//        org.renjin.sexp.IntBufferVector bufferVector=(org.renjin.sexp.IntBufferVector) (tagResults.get(0));
-//        System.out.println(bufferVector.getElementAsInt(100));
-        TagTreeNode python = new TagTreeNode("python", -1);
-        for (int i = 0; i < tags.length(); i++) {
-            String tag = tags.getElementAsString(i);
-            int tagIndex = tagNames.indexOf(tag) + 1;
-            TagTreeNode directChild = new TagTreeNode(tag, tagIndex);
-            String key = toUniqueKey(directChild);
-            if (tagTreeNodeSet.contains(key)) {
-                continue;
-            } else {
-                tagTreeNodeSet.add(key);
+        for(int configIndex=0; configIndex<configurations.length; configIndex++){
+            tagTreeNodeSet.clear();
+            tagVectorIndex=1;
+            //reset configurations
+            TAG_BRANCHING_OCCURRENCE_THRESHOLD=configurations[configIndex][0]; 
+            BRANCH_OCCURRENCE_THRESHOLD=configurations[configIndex][1];
+            BRANCH_RATIO_THRESHOLD=configurations[configIndex][2];
+            IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS=configurations[configIndex][3];
+            
+            org.renjin.sexp.StringArrayVector tags = (org.renjin.sexp.StringArrayVector) engine.eval("as.vector(indTags[indTags$indTagRatio>=" + IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS + ",]$indTagName)");
+            ListVector tagResults = (ListVector) engine.eval("tags");
+            TagTreeNode python = new TagTreeNode("python", -1);
+            for (int i = 0; i < tags.length(); i++) {
+                String tag = tags.getElementAsString(i);
+                int tagIndex = tagNames.indexOf(tag) + 1;
+                TagTreeNode directChild = new TagTreeNode(tag, tagIndex);
+                String key = toUniqueKey(directChild);
+                if (tagTreeNodeSet.contains(key)) {
+                    continue;
+                } else {
+                    tagTreeNodeSet.add(key);
+                }
+                python.addChildNode(directChild);
+
+                double base = countMatch(tagResults, directChild.getPath());
+                processTagTreeNode(tagResults, tagNames, base, directChild);
             }
-            python.addChildNode(directChild);
+            //print out the knowledge tree
+            System.out.println(python);
+            List<String> vectors1 = toRVectorNotation(python);//vectors keep a string list of vector construction codes for each tag for R
+            List<String> vectors = new ArrayList<>();
+            for (int i = 1; i < tagVectorIndex; i++) {
+                vectors.add("TAGVECTOR" + i);
+            }
+            StringBuffer matrixConstructionR=new StringBuffer();
+            for (String str : vectors1) {
+                //System.out.println(str);
+                matrixConstructionR.append(str).append("\r\n");
+            }
+            //construct a matrix to be used by kmeans
+            String output = "clusters=matrix(c(" + String.join(",", vectors.toArray(new String[0])) + "), byrow=TRUE, nrow=" + (tagVectorIndex - 1) + ")";
+            //System.out.println(output);
+            matrixConstructionR.append(output).append("\r\n");
+            engine.eval(matrixConstructionR.toString());
 
-            double base = countMatch(tagResults, directChild.getPath());
-            processTagTreeNode(tagResults, tagNames, base, directChild);
+            Set<Integer> tagIndicies = getAllNodesAsIndicies(python);
+            //System.out.println(Arrays.deepToString(tagIndicies.toArray()).replace("[", "(").replace("]", ")"));
+            //output result
+            engine.eval("k=kmeans(tags, clusters, iter.max=1)");
+            org.renjin.primitives.R$primitive$$div$deferred_dd k=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k$betweenss/k$totss");
+            System.out.println(k.asReal());
+            engine.eval("k1=kmeans(tags, "+vectors.size()+")");
+            org.renjin.primitives.R$primitive$$div$deferred_dd k1=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k1$betweenss/k1$totss");
+            System.out.println(k1.asReal());
         }
-        System.out.println(python);
-        //System.out.println(Arrays.deepToString(toRVectorNotation(python).toArray()));
-        List<String> vectors1 = toRVectorNotation(python);
-        List<String> vectors = new ArrayList<>();
-        for (int i = 1; i < tagVectorIndex; i++) {
-            vectors.add("TAGVECTOR" + i);
-        }
-
-        for (String str : vectors1) {
-            System.out.println(str);
-        }
-        String output = "clusters=matrix(c(" + String.join(",", vectors.toArray(new String[0])) + "), byrow=TRUE, nrow=" + (tagVectorIndex - 1) + ")";
-        System.out.println(output);
-        
-        Set<Integer> tagIndicies=getAllNodesAsIndicies(python);
-        System.out.println(Arrays.deepToString(tagIndicies.toArray()).replace("[", "(").replace("]", ")"));
 
 //        List<double[]> centers = getAllNodesAsVectors(tagResults, python);
 //        List<double[]> tagsd = new ArrayList<>();
@@ -172,7 +190,7 @@ public class NewMain {
         }
         return ret;
     }
-    
+
     private static double calculateDistance(double[] point1, double[] point2) {
         double sum = 0;
         for (int i = 0; i < point1.length; i++) {
