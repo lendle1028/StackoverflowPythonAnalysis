@@ -66,7 +66,8 @@ public class NewMain {
     
     //hold configuration parameters: TAG_BRANCHING_OCCURRENCE_THRESHOLD, BRANCH_OCCURRENCE_THRESHOLD, BRANCH_RATIO_THRESHOLD, IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS
     private static double [][] configurations=new double[][]{
-        {200, 100, 0.1d, 0.5d}
+        {200, 100, 0.1d, 0.5d},//38 centers, 0.516166777901111 v.s. kmeans=0.385533109047687~0.425939075950038
+        {200, 50, 0.01d, 0.5d}//54 centers, 0.556980020200752 v.s. kmeans=0.427998055140778~0.464353053087802
     };
 
     private static HashSet<String> tagTreeNodeSet = new HashSet<>();
