@@ -85,6 +85,19 @@ public class NewMain {
         engine.eval(script);
         org.renjin.sexp.StringArrayVector tagNames = (org.renjin.sexp.StringArrayVector) engine.eval("as.character(tagNames)");
         StringBuffer rCodes=new StringBuffer();
+        //generate configurations
+        List<double []> newConfs=new ArrayList<>();
+        for(int i=0; i<10; i++){
+            newConfs.add(new double[]{
+                200, 100-(100-30)/10*i, 0.1d-(0.1-0.01)/10*i, 0.5d
+            });
+            
+            newConfs.add(new double[]{
+                200, 100-(100-30)/10*i, 0.1d-(0.1-0.01)/10*i, 0.4d
+            });
+        }
+        configurations=newConfs.toArray(new double[0][0]);
+        
         for(int configIndex=0; configIndex<configurations.length; configIndex++){
             tagTreeNodeSet.clear();
             tagVectorIndex=1;
@@ -134,20 +147,28 @@ public class NewMain {
             //output result
             rCodes.append("k=kmeans(tags, clusters, iter.max=1)\r\n");
             rCodes.append("k0=k$betweenss/k$totss\r\n");
+            rCodes.append("str=paste(\"centers="+vectors.size()+", "+configurations[configIndex][0]+
+                    ", "+configurations[configIndex][1]+
+                    ", "+configurations[configIndex][2]+
+                    ", "+configurations[configIndex][3]+": \", k0)\r\n");
+            rCodes.append("print(str)\r\n");
 //            rCodes.append("print(\"k="+vectors.size()+"\")\r\n");
 //            rCodes.append("print(k$betweenss/k$totss)\r\n");
             //org.renjin.primitives.R$primitive$$div$deferred_dd k=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k$betweenss/k$totss");
             //System.out.println(k.asReal());
-            rCodes.append("k1=kmeans(tags, "+vectors.size()+")\r\n");
-            rCodes.append("k2=kmeans(tags, "+vectors.size()+")\r\n");
-            rCodes.append("k3=kmeans(tags, "+vectors.size()+")\r\n");
-            rCodes.append("k123=(k1$betweenss/k1$totss+k2$betweenss/k2$totss+k3$betweenss/k3$totss)/3\r\n");
-            rCodes.append("paste(\"k="+vectors.size()+"\", k0, \"v.s.\" ,k123)\r\n");
+            
+            //original kmeans for comparison
+//            rCodes.append("k1=kmeans(tags, "+vectors.size()+")\r\n");
+//            rCodes.append("k2=kmeans(tags, "+vectors.size()+")\r\n");
+//            rCodes.append("k3=kmeans(tags, "+vectors.size()+")\r\n");
+//            rCodes.append("k123=(k1$betweenss/k1$totss+k2$betweenss/k2$totss+k3$betweenss/k3$totss)/3\r\n");
+//            rCodes.append("paste(\"k="+vectors.size()+"\", k0, \"v.s.\" ,k123)\r\n");
+            
             //org.renjin.primitives.R$primitive$$div$deferred_dd k1=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k1$betweenss/k1$totss");
             //System.out.println(k1.asReal());
         }
-        //engine.eval(rCodes.toString());
-        System.out.println(rCodes.toString());
+        engine.eval(rCodes.toString());
+        //System.out.println(rCodes.toString());
 
 //        List<double[]> centers = getAllNodesAsVectors(tagResults, python);
 //        List<double[]> tagsd = new ArrayList<>();
