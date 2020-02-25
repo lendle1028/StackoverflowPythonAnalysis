@@ -67,7 +67,8 @@ public class NewMain {
     //hold configuration parameters: TAG_BRANCHING_OCCURRENCE_THRESHOLD, BRANCH_OCCURRENCE_THRESHOLD, BRANCH_RATIO_THRESHOLD, IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS
     private static double [][] configurations=new double[][]{
         {200, 100, 0.1d, 0.5d},//38 centers, 0.516166777901111 v.s. kmeans=0.385533109047687~0.425939075950038
-        {200, 50, 0.01d, 0.5d}//54 centers, 0.556980020200752 v.s. kmeans=0.427998055140778~0.464353053087802
+        {200, 50, 0.01d, 0.5d},//54 centers, 0.556980020200752 v.s. kmeans=0.427998055140778~0.464353053087802
+        {200, 30, 0.01d, 0.5d}//54 centers, 0.556980020200752 v.s. kmeans=0.427998055140778~0.464353053087802
     };
 
     private static HashSet<String> tagTreeNodeSet = new HashSet<>();
@@ -83,6 +84,7 @@ public class NewMain {
         String script = FileUtils.readFileToString(new File("script.R"), "utf-8");
         engine.eval(script);
         org.renjin.sexp.StringArrayVector tagNames = (org.renjin.sexp.StringArrayVector) engine.eval("as.character(tagNames)");
+        StringBuffer rCodes=new StringBuffer();
         for(int configIndex=0; configIndex<configurations.length; configIndex++){
             tagTreeNodeSet.clear();
             tagVectorIndex=1;
@@ -111,33 +113,41 @@ public class NewMain {
                 processTagTreeNode(tagResults, tagNames, base, directChild);
             }
             //print out the knowledge tree
-            System.out.println(python);
+            //System.out.println(python);
             List<String> vectors1 = toRVectorNotation(python);//vectors keep a string list of vector construction codes for each tag for R
             List<String> vectors = new ArrayList<>();
             for (int i = 1; i < tagVectorIndex; i++) {
                 vectors.add("TAGVECTOR" + i);
             }
-            StringBuffer matrixConstructionR=new StringBuffer();
+           
             for (String str : vectors1) {
                 //System.out.println(str);
-                matrixConstructionR.append(str).append("\r\n");
+                rCodes.append(str).append("\r\n");
             }
             //construct a matrix to be used by kmeans
             String output = "clusters=matrix(c(" + String.join(",", vectors.toArray(new String[0])) + "), byrow=TRUE, nrow=" + (tagVectorIndex - 1) + ")";
             //System.out.println(output);
-            matrixConstructionR.append(output).append("\r\n");
-            engine.eval(matrixConstructionR.toString());
+            rCodes.append(output).append("\r\n");
 
             Set<Integer> tagIndicies = getAllNodesAsIndicies(python);
             //System.out.println(Arrays.deepToString(tagIndicies.toArray()).replace("[", "(").replace("]", ")"));
             //output result
-            engine.eval("k=kmeans(tags, clusters, iter.max=1)");
-            org.renjin.primitives.R$primitive$$div$deferred_dd k=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k$betweenss/k$totss");
-            System.out.println(k.asReal());
-            engine.eval("k1=kmeans(tags, "+vectors.size()+")");
-            org.renjin.primitives.R$primitive$$div$deferred_dd k1=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k1$betweenss/k1$totss");
-            System.out.println(k1.asReal());
+            rCodes.append("k=kmeans(tags, clusters, iter.max=1)\r\n");
+            rCodes.append("k0=k$betweenss/k$totss\r\n");
+//            rCodes.append("print(\"k="+vectors.size()+"\")\r\n");
+//            rCodes.append("print(k$betweenss/k$totss)\r\n");
+            //org.renjin.primitives.R$primitive$$div$deferred_dd k=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k$betweenss/k$totss");
+            //System.out.println(k.asReal());
+            rCodes.append("k1=kmeans(tags, "+vectors.size()+")\r\n");
+            rCodes.append("k2=kmeans(tags, "+vectors.size()+")\r\n");
+            rCodes.append("k3=kmeans(tags, "+vectors.size()+")\r\n");
+            rCodes.append("k123=(k1$betweenss/k1$totss+k2$betweenss/k2$totss+k3$betweenss/k3$totss)/3\r\n");
+            rCodes.append("paste(\"k="+vectors.size()+"\", k0, \"v.s.\" ,k123)\r\n");
+            //org.renjin.primitives.R$primitive$$div$deferred_dd k1=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k1$betweenss/k1$totss");
+            //System.out.println(k1.asReal());
         }
+        //engine.eval(rCodes.toString());
+        System.out.println(rCodes.toString());
 
 //        List<double[]> centers = getAllNodesAsVectors(tagResults, python);
 //        List<double[]> tagsd = new ArrayList<>();
