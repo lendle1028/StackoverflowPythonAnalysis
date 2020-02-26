@@ -5,11 +5,14 @@
  */
 package rocks.imsofa.stackoverflowpythonanalysis;
 
+import com.google.gson.Gson;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import javax.script.ScriptEngine;
@@ -63,9 +66,9 @@ public class NewMain {
     private static double BRANCH_OCCURRENCE_THRESHOLD = 100;
     private static double BRANCH_RATIO_THRESHOLD = 0.1d;
     private static double IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS = 0.5d;
-    
+
     //hold configuration parameters: TAG_BRANCHING_OCCURRENCE_THRESHOLD, BRANCH_OCCURRENCE_THRESHOLD, BRANCH_RATIO_THRESHOLD, IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS
-    private static double [][] configurations=new double[][]{
+    private static double[][] configurations = new double[][]{
         {200, 100, 0.1d, 0.5d},//38 centers, 0.516166777901111 v.s. kmeans=0.385533109047687~0.425939075950038
         {200, 50, 0.01d, 0.5d},//54 centers, 0.556980020200752 v.s. kmeans=0.427998055140778~0.464353053087802
         {200, 30, 0.01d, 0.5d}//54 centers, 0.556980020200752 v.s. kmeans=0.427998055140778~0.464353053087802
@@ -84,29 +87,34 @@ public class NewMain {
         String script = FileUtils.readFileToString(new File("script.R"), "utf-8");
         engine.eval(script);
         org.renjin.sexp.StringArrayVector tagNames = (org.renjin.sexp.StringArrayVector) engine.eval("as.character(tagNames)");
-        StringBuffer rCodes=new StringBuffer();
+        Map<Integer, Double> kmeansResultCache = new HashMap<Integer, Double>();//# centers=>kmeans results for faster calculation
+        List<Round> results=new ArrayList<>();
         //generate configurations
-        List<double []> newConfs=new ArrayList<>();
-        for(int i=0; i<10; i++){
-            newConfs.add(new double[]{
-                200, 100-(100-30)/10*i, 0.1d-(0.1-0.01)/10*i, 0.5d
-            });
-            
-            newConfs.add(new double[]{
-                200, 100-(100-30)/10*i, 0.1d-(0.1-0.01)/10*i, 0.4d
-            });
+        List<double[]> newConfs = new ArrayList<>();
+        double[] values_1 = new double[]{100, 70, 50, 30, 10, 1};//values of parameter 1
+        double[] values_2 = new double[]{0.1, 0.05, 0.01, 0.005};//values of parameter 2
+        double[] values_3 = new double[]{0.5, 0.4, 0.3};//values of parameter 3
+        for (int i = 0; i < values_1.length; i++) {
+            for (int j = 0; j < values_2.length; j++) {
+                for (int k = 0; k < values_3.length; k++) {
+                    newConfs.add(new double[]{
+                        200, values_1[i], values_2[j], values_3[k]
+                    });
+                }
+            }
         }
-        configurations=newConfs.toArray(new double[0][0]);
-        
-        for(int configIndex=0; configIndex<configurations.length; configIndex++){
+        configurations = newConfs.toArray(new double[0][0]);
+
+        for (int configIndex = 0; configIndex < configurations.length; configIndex++) {
+            StringBuffer rCodes = new StringBuffer();
             tagTreeNodeSet.clear();
-            tagVectorIndex=1;
+            tagVectorIndex = 1;
             //reset configurations
-            TAG_BRANCHING_OCCURRENCE_THRESHOLD=configurations[configIndex][0]; 
-            BRANCH_OCCURRENCE_THRESHOLD=configurations[configIndex][1];
-            BRANCH_RATIO_THRESHOLD=configurations[configIndex][2];
-            IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS=configurations[configIndex][3];
-            
+            TAG_BRANCHING_OCCURRENCE_THRESHOLD = configurations[configIndex][0];
+            BRANCH_OCCURRENCE_THRESHOLD = configurations[configIndex][1];
+            BRANCH_RATIO_THRESHOLD = configurations[configIndex][2];
+            IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS = configurations[configIndex][3];
+
             org.renjin.sexp.StringArrayVector tags = (org.renjin.sexp.StringArrayVector) engine.eval("as.vector(indTags[indTags$indTagRatio>=" + IND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS + ",]$indTagName)");
             ListVector tagResults = (ListVector) engine.eval("tags");
             TagTreeNode python = new TagTreeNode("python", -1);
@@ -132,11 +140,12 @@ public class NewMain {
             for (int i = 1; i < tagVectorIndex; i++) {
                 vectors.add("TAGVECTOR" + i);
             }
-           
+
             for (String str : vectors1) {
                 //System.out.println(str);
                 rCodes.append(str).append("\r\n");
             }
+
             //construct a matrix to be used by kmeans
             String output = "clusters=matrix(c(" + String.join(",", vectors.toArray(new String[0])) + "), byrow=TRUE, nrow=" + (tagVectorIndex - 1) + ")";
             //System.out.println(output);
@@ -147,27 +156,55 @@ public class NewMain {
             //output result
             rCodes.append("k=kmeans(tags, clusters, iter.max=1)\r\n");
             rCodes.append("k0=k$betweenss/k$totss\r\n");
-            rCodes.append("str=paste(\"centers="+vectors.size()+", "+configurations[configIndex][0]+
-                    ", "+configurations[configIndex][1]+
-                    ", "+configurations[configIndex][2]+
-                    ", "+configurations[configIndex][3]+": \", k0)\r\n");
+            rCodes.append("str=paste(\"centers=" + vectors.size() + ", " + configurations[configIndex][0]
+                    + ", " + configurations[configIndex][1]
+                    + ", " + configurations[configIndex][2]
+                    + ", " + configurations[configIndex][3] + ": \", k0)\r\n");
             rCodes.append("print(str)\r\n");
+            try {
+                engine.eval(rCodes.toString());
+                org.renjin.primitives.R$primitive$$div$deferred_dd k = (org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k0");
+                Round round = new Round();
+                round.setCenters(vectors.size());
+                round.setBRANCH_OCCURRENCE_THRESHOLD(configurations[configIndex][1]);
+                round.setBRANCH_RATIO_THRESHOLD(configurations[configIndex][2]);
+                round.setTAG_BRANCHING_OCCURRENCE_THRESHOLD(configurations[configIndex][0]);
+                round.setIND_TAG_RATIO_THRESHOLD_AS_STARTING_TAGS(configurations[configIndex][3]);
+                round.setResult(k.asReal());
+                rCodes.delete(0, rCodes.length());
+                if (kmeansResultCache.containsKey(vectors.size())) {
+                    round.setKmeansResult(kmeansResultCache.get(vectors.size()));
+                } else {
+                    rCodes.append("k1=kmeans(tags, " + vectors.size() + ")\r\n");
+                    rCodes.append("k2=kmeans(tags, " + vectors.size() + ")\r\n");
+                    rCodes.append("k3=kmeans(tags, " + vectors.size() + ")\r\n");
+                    rCodes.append("k123=(k1$betweenss/k1$totss+k2$betweenss/k2$totss+k3$betweenss/k3$totss)/3\r\n");
+                    engine.eval(rCodes.toString());
+                    org.renjin.primitives.R$primitive$$div$deferred_dd k1 = (org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k123");
+                    round.setKmeansResult(k1.asReal());
+                    kmeansResultCache.put(vectors.size(), k1.asReal());
+                }
+                results.add(round);
+                System.out.println("kmeans: "+round.getKmeansResult());
+            } catch (Exception e) {
+                System.out.println("fail on centers=" + vectors.size());
+            }
 //            rCodes.append("print(\"k="+vectors.size()+"\")\r\n");
 //            rCodes.append("print(k$betweenss/k$totss)\r\n");
             //org.renjin.primitives.R$primitive$$div$deferred_dd k=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k$betweenss/k$totss");
             //System.out.println(k.asReal());
-            
+
             //original kmeans for comparison
 //            rCodes.append("k1=kmeans(tags, "+vectors.size()+")\r\n");
 //            rCodes.append("k2=kmeans(tags, "+vectors.size()+")\r\n");
 //            rCodes.append("k3=kmeans(tags, "+vectors.size()+")\r\n");
 //            rCodes.append("k123=(k1$betweenss/k1$totss+k2$betweenss/k2$totss+k3$betweenss/k3$totss)/3\r\n");
 //            rCodes.append("paste(\"k="+vectors.size()+"\", k0, \"v.s.\" ,k123)\r\n");
-            
             //org.renjin.primitives.R$primitive$$div$deferred_dd k1=(org.renjin.primitives.R$primitive$$div$deferred_dd) engine.eval("k1$betweenss/k1$totss");
             //System.out.println(k1.asReal());
         }
-        engine.eval(rCodes.toString());
+        
+        System.out.println(new Gson().toJson(results));
         //System.out.println(rCodes.toString());
 
 //        List<double[]> centers = getAllNodesAsVectors(tagResults, python);
